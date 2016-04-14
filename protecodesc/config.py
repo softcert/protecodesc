@@ -14,7 +14,7 @@ except ImportError:  # Python 2
 USER_CONFIG_FILE = os.path.expanduser('~/.protecodesc')
 KEYRING_SERVICE = 'protecodesc'
 SECTION = 'protecodesc'
-
+DEFAULT_HOST = "https://protecode-sc.com"
 
 class ClientConfig:
 
@@ -40,10 +40,20 @@ class ClientConfig:
         """
         try:
             return self._config.get(SECTION, 'alternate_host')
-        except configparser.NoSectionError:
+        except (configparser.NoSectionError, configparser.NoOptionError):
+            return DEFAULT_HOST
+
+    def get_default_group(self):
+        try:
+            return self._config.get(SECTION, 'default_group')
+        except (configparser.NoSectionError, configparser.NoOptionError):
             return None
-        except configparser.NoOptionError:
-            return None
+
+    def set_default_group(self, default_group):
+        if not self._config.has_section(SECTION):
+            self._config.add_section(SECTION)
+        self._config.set(SECTION, 'default_group', default_group)
+        self._config.write(open(USER_CONFIG_FILE, 'w'))
 
     def set_host(self, appcheck_uri):
         """Store AppCheck URI (e.g. AppCheck appliance)"""

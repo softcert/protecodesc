@@ -96,6 +96,14 @@ def list(appcheck, group):
     else:
         click.echo("No apps found.")
 
+@cli.add_command
+@click.argument('default_group', 'Set default group')
+@click.command()
+@use_appcheck
+def group(appcheck, default_group):
+    """Set default group"""
+    config = ClientConfig()
+    config.set_default_group(int(default_group))
 
 @cli.add_command
 @click.argument('id_or_sha1', 'Analysis ID or file SHA1 hash')
@@ -222,6 +230,9 @@ def scan(appcheck, file, group, background):
     If a directory is analyzed, it will be compressed to a ZIP archive before
     upload.
     """
+
+    if not group:
+        group = ClientConfig().get_default_group()
 
     file_count = len(file)
     click.echo('Uploading {count} objects...'.format(count=file_count))
