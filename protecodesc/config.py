@@ -11,12 +11,12 @@ except ImportError:  # Python 2
 
 
 # Where to store settings
-USER_CONFIG_FILE = os.path.expanduser('~/.appcheck')
-KEYRING_SERVICE = 'appcheck'
-SECTION = 'appcheck'
+USER_CONFIG_FILE = os.path.expanduser('~/.protecodesc')
+KEYRING_SERVICE = 'protecodesc'
+SECTION = 'protecodesc'
 
 
-class AppcheckClientConfig:
+class ClientConfig:
 
     def __init__(self, config_files=(USER_CONFIG_FILE,)):
         self._config = configparser.ConfigParser()
@@ -33,7 +33,7 @@ class AppcheckClientConfig:
             username, password = None, None
         return username, password
 
-    def get_appcheck_host(self):
+    def get_host(self):
         """Return Appcheck alternate host address or None for default
 
         For example, https://appcheck.codenomicon.com
@@ -45,7 +45,7 @@ class AppcheckClientConfig:
         except configparser.NoOptionError:
             return None
 
-    def set_appcheck_host(self, appcheck_uri):
+    def set_host(self, appcheck_uri):
         """Store AppCheck URI (e.g. AppCheck appliance)"""
         if not self._config.has_section(SECTION):
             self._config.add_section(SECTION)

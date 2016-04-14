@@ -13,7 +13,7 @@ import functools
 import sys
 
 from protecodesc.protecodesc import ProtecodeSC
-from protecodesc.config import AppcheckClientConfig
+from protecodesc.config import ClientConfig
 from protecodesc.utils import clean_version, zip_directory
 from protecodesc import exceptions
 
@@ -30,13 +30,13 @@ DEFAULT_APPCHECK_HOST = 'https://protecode-sc.com'
 
 
 def get_appcheck(insecure=False):
-    config = AppcheckClientConfig()
+    config = ClientConfig()
     username, password = config.credentials()
     if not (username and password):
         click.echo("Login required.")
         username, password = update_login_credentials()
     # Support alternate Appcheck address, e.g. appliance.
-    appcheck_host = config.get_appcheck_host() or DEFAULT_APPCHECK_HOST
+    appcheck_host = config.get_host() or DEFAULT_APPCHECK_HOST
     appcheck = ProtecodeSC(creds=(username, password), host=appcheck_host,
                         insecure=insecure)
     return appcheck
@@ -284,12 +284,12 @@ def delete(appcheck, id_or_sha1):
 @click.command()
 def login():
     """Save username/password and configure server address"""
-    config = AppcheckClientConfig()
+    config = ClientConfig()
     if click.confirm("Use Protecode SC managed service https://protecode-sc.com/?"):
-        config.set_appcheck_host(DEFAULT_APPCHECK_HOST)
+        config.set_host(DEFAULT_APPCHECK_HOST)
     else:
         host = click.prompt("Enter URI (https://YOUR-APPLIANCE)")
-        config.set_appcheck_host(host)
+        config.set_host(host)
     update_login_credentials()
 
 
@@ -297,14 +297,14 @@ def login():
 @click.command()
 def logout():
     """Forget saved username and password"""
-    config = AppcheckClientConfig()
+    config = ClientConfig()
     config.forget_credentials()
 
 
 def update_login_credentials():
     username = click.prompt("Login username/email-address")
     password = click.prompt("Login password", hide_input=True)
-    config = AppcheckClientConfig()
+    config = ClientConfig()
     if click.confirm('Save information and do not ask again?'):
         config.set_credentials(username, password)
         click.echo("Saved login details.")
