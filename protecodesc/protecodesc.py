@@ -91,7 +91,7 @@ class ProtecodeSC(object):
             error = "Out of HTTP request retry attempts"
             raise exceptions.OutOfRetriesError(error)
 
-    def upload_file(self, file_path, display_name=None, group=None):
+    def upload_file(self, file_path, display_name=None, group=None, poll=False):
         """Upload file to Appcheck
 
         :param file_path: File to upload
@@ -115,11 +115,23 @@ class ProtecodeSC(object):
         try:
             scanned_sha1 = file_sha1(file_path)
             result = self.get_result(id_or_sha1=scanned_sha1)
+            return result
+
         except exceptions.ResultNotFound:  # upload as new
             r = self._retry_request(_upload_file, [], {})
             assert isinstance(r, requests.Response)
             self._raise_for_status(r)
-            result = r.json()
+            result = r.json().get('results', {})
+
+        while poll and result.get('status', '') == ProtecodeSC.STATUS_BUSY:
+            logger.debug("Polling..")
+            data = self.get_result(id_or_sha1=scanned_sha1)
+            result = data.get('results', {})
+            if result.get('status', '') == ProtecodeSC.STATUS_BUSY:
+                time.sleep(5)
+                continue
+            break
+
         return result
 
     def get_result(self, id_or_sha1):
