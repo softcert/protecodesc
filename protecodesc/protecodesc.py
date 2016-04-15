@@ -26,6 +26,7 @@ API_URL_MAP = {'upload': '{host}/api/upload/{filename}',
                'rescan': '{host}/api/rescan/{id_or_sha1}/',
                'groups': '{host}/api/groups/',
                'apps': '{host}/api/apps/',
+               'components': '{host}/api/components/{component}/',
                'apps-group': '{host}/api/apps/{group}'}
 
 
@@ -173,15 +174,14 @@ class ProtecodeSC(object):
         self._raise_for_status(r)
         return r.json()
 
-    def list_apps(self, group=None):
-        """List apps, optionally by group
-        :param group: Group name filter [optional]
+    def component(self, component, version=None):
+        """Get component information
+        :param component: component
+        :param version: version
         """
-        if not group:
-            uri = self._uri('apps')
-        else:
-            uri = self._uri('apps-group', group=group)
-
+        uri = self._uri('components', component=component)
+        if version:
+            uri = "{base}?version={version}".format(base=uri, version=version)
         r = self._retry_request(self.session.get, [uri], {'auth': self.creds})
         self._raise_for_status(r)
         return r.json()
